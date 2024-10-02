@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数字生命鲁迅</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e9ecef;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+        h1 {
+            color: #343a40;
+            text-align: center;
+            margin: 20px 0;
+            font-size: 2em; 
+            animation: fadeIn 0.5s;
+            text-shadow: 0 0 20px rgba(0, 123, 255, 0.5); 
+        }
+        #chatContainer {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 0 20px;
+            background: #ffffff;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            animation: glow 1.5s infinite alternate; /* 添加光晕动画 */
+        }
+        #messages {
+            padding: 15px;
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            animation: fadeIn 0.5s;
+            scrollbar-width: thin;
+            scrollbar-color: #007bff #f0f4f8;
+        }
+        #messages::-webkit-scrollbar {
+            width: 8px;
+        }
+        #messages::-webkit-scrollbar-thumb {
+            background-color: #007bff;
+            border-radius: 10px;
+        }
+        #messages::-webkit-scrollbar-track {
+            background: #f0f4f8;
+        }
+        .message {
+            margin: 5px 0;
+            padding: 12px 15px;
+            border-radius: 20px;
+            max-width: 75%;
+            position: relative;
+            word-wrap: break-word;
+            transition: transform 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .user {
+            background-color: #d1e7dd;
+            align-self: flex-end;
+            border-bottom-right-radius: 0;
+            animation: slideInRight 0.5s;
+        }
+        .ai {
+            background-color: #f8d7da;
+            align-self: flex-start;
+            border-bottom-left-radius: 0;
+            animation: slideInLeft 0.5s;
+            position: relative;
+        }
+        .ai .retryButton {
+            margin-left: 10px;
+            padding: 5px 10px;
+            background-color: #ffc107;
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .ai .retryButton:hover {
+            background-color: #e0a800;
+        }
+        .inputContainer {
+            display: flex;
+            margin: 10px;
+            position: relative;
+        }
+        textarea {
+            flex: 1;
+            height: 60px;
+            padding: 12px 15px;
+            border: 1px solid #ced4da;
+            border-radius: 30px;
+            font-size: 16px;
+            resize: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            box-shadow: 0 0 15px rgba(0, 123, 255, 0.1);
+        }
+        textarea:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 15px rgba(0, 123, 255, 0.3);
+            outline: none;
+        }
+        button {
+            padding: 12px 20px;
+            margin-left: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
+        }
+        button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0, 123, 255, 0.2);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideInRight {
+            from { transform: translateX(20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideInLeft {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes glow {
+            0% { box-shadow: 0 0 20px rgba(0, 123, 255, 0.5); }
+            100% { box-shadow: 0 0 30px rgba(0, 123, 255, 0.8); }
+        }
+        .clearButton {
+            margin: 20px;
+            background-color: #dc3545;
+        }
+        .clearButton:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+
+<h1>数字生命 鲁迅</h1>
+<button id="clearButton" class="clearButton">清空对话</button>
+<div id="chatContainer">
+    <div id="messages"></div>
+</div>
+<div class="inputContainer">
+    <textarea id="userInput" placeholder="请输入您的问题..."></textarea>
+    <button id="sendButton">发送</button>
+</div>
+
+<script>
+    document.getElementById('sendButton').onclick = function() {
+        const userInput = document.getElementById('userInput').value;
+        const appId = 'R4FUk09aUtR8QD5K5udynKfDXkDgI6QW';
+        const secretKey = 'PLZtxYkPYT1XVwsMvDTslqvdj6WSP7j9';
+        const openId = 'user_' + Date.now(); 
+
+        const messageToSend = `扮演鲁迅回复我：${userInput}`;
+        
+        const requestData = {
+            message: {
+                content: {
+                    type: "text",
+                    value: {
+                        showText: messageToSend
+                    }
+                }
+            },
+            source: appId,
+            from: "openapi",
+            openId: openId
+        };
+
+        addMessage(userInput, 'user');
+
+        fetch(`https://agentapi.baidu.com/assistant/getAnswer?appId=${appId}&secretKey=${secretKey}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 0) {
+                const responseContent = data.data.content[0].data;
+                addMessage(responseContent, 'ai', messageToSend); 
+            } else {
+                addMessage('请求失败: ' + data.message, 'ai');
+            }
+        })
+        .catch(error => {
+            addMessage('发生错误: ' + error, 'ai');
+        });
+
+        document.getElementById('userInput').value = ''; 
+    };
+
+    document.getElementById('clearButton').onclick = function() {
+        document.getElementById('messages').innerHTML = ''; 
+    };
+
+    function addMessage(text, sender, originalMessage = '') {
+        const messageElement = document.createElement('div');
+        messageElement.className = 'message ' + sender;
+        messageElement.innerText = text;
+
+        if (sender === 'ai') {
+            const retryButton = document.createElement('button');
+            retryButton.className = 'retryButton';
+            retryButton.innerText = '重新回答';
+            retryButton.onclick = function() {
+                messageElement.innerText = '正在重新回答...'; 
+                fetchNewResponse(originalMessage, messageElement);
+            };
+            messageElement.appendChild(retryButton);
+        }
+
+        document.getElementById('messages').appendChild(messageElement);
+        document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+    }
+
+    function fetchNewResponse(originalMessage, messageElement) {
+        const appId = 'R4FUk09aUtR8QD5K5udynKfDXkDgI6QW';
+        const secretKey = 'PLZtxYkPYT1XVwsMvDTslqvdj6WSP7j9';
+        const openId = 'user_' + Date.now(); 
+
+        const requestData = {
+            message: {
+                content: {
+                    type: "text",
+                    value: {
+                        showText: `以鲁迅的身份和语气回复我：${originalMessage}`
+                    }
+                }
+            },
+            source: appId,
+            from: "openapi",
+            openId: openId
+        };
+
+        fetch(`https://agentapi.baidu.com/assistant/getAnswer?appId=${appId}&secretKey=${secretKey}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 0) {
+                const responseContent = data.data.content[0].data;
+                messageElement.innerText = responseContent; 
+            } else {
+                messageElement.innerText = '请求失败: ' + data.message; 
+            }
+        })
+        .catch(error => {
+            messageElement.innerText = '发生错误: ' + error; 
+        });
+    }
+</script>
+
+</body>
+</html>
