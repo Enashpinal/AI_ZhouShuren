@@ -17,21 +17,10 @@
         h1 {
             color: #343a40;
             text-align: center;
-            margin: 20px 0;
+            margin: 10px 0;
             font-size: 2em; 
             animation: fadeIn 0.5s;
             text-shadow: 0 0 20px rgba(0, 123, 255, 0.5); 
-        }
-        #chatContainer {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            border-radius: 12px;
-            overflow: hidden;
-            margin: 0 20px;
-            background: #ffffff;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-            animation: glow 1.5s infinite alternate; /* 添加光晕动画 */
         }
         #messages {
             padding: 15px;
@@ -42,6 +31,7 @@
             animation: fadeIn 0.5s;
             scrollbar-width: thin;
             scrollbar-color: #007bff #f0f4f8;
+            margin: 0 20px; 
         }
         #messages::-webkit-scrollbar {
             width: 8px;
@@ -70,33 +60,38 @@
             animation: slideInRight 0.5s;
         }
         .ai {
-            background-color: #f8d7da;
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
             align-self: flex-start;
             border-bottom-left-radius: 0;
             animation: slideInLeft 0.5s;
-            position: relative;
         }
-        .ai .retryButton {
-            margin-left: 10px;
+        .retryButton {
+            margin-top: 5px;
             padding: 5px 10px;
             background-color: #ffc107;
             color: white;
             border: none;
             border-radius: 15px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s, opacity 0.3s;
+            opacity: 0; 
+            position: absolute;
+            bottom: -35px; 
+            left: 0;
+            transition: opacity 0.3s;
         }
-        .ai .retryButton:hover {
-            background-color: #e0a800;
+        .ai:hover .retryButton {
+            opacity: 1; 
         }
         .inputContainer {
             display: flex;
             margin: 10px;
             position: relative;
+            width: calc(100% - 40px); 
         }
         textarea {
             flex: 1;
-            height: 60px;
+            min-height: 40px; 
             padding: 12px 15px;
             border: 1px solid #ced4da;
             border-radius: 30px;
@@ -141,39 +136,31 @@
             from { transform: translateX(-20px); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
-        @keyframes glow {
-            0% { box-shadow: 0 0 20px rgba(0, 123, 255, 0.5); }
-            100% { box-shadow: 0 0 30px rgba(0, 123, 255, 0.8); }
-        }
-        .clearButton {
-            margin: 20px;
-            background-color: #dc3545;
-        }
-        .clearButton:hover {
-            background-color: #c82333;
-        }
     </style>
 </head>
 <body>
 
 <h1>数字生命 鲁迅</h1>
 <button id="clearButton" class="clearButton">清空对话</button>
-<div id="chatContainer">
-    <div id="messages"></div>
-</div>
+<div id="messages"></div>
 <div class="inputContainer">
-    <textarea id="userInput" placeholder="请输入您的问题..."></textarea>
+    <textarea id="userInput" placeholder="请输入您的问题..." oninput="autoResize(this)"></textarea>
     <button id="sendButton">发送</button>
 </div>
 
 <script>
+    function autoResize(textarea) {
+        textarea.style.height = 'auto'; 
+        textarea.style.height = textarea.scrollHeight + 'px'; 
+    }
+
     document.getElementById('sendButton').onclick = function() {
         const userInput = document.getElementById('userInput').value;
         const appId = 'R4FUk09aUtR8QD5K5udynKfDXkDgI6QW';
         const secretKey = 'PLZtxYkPYT1XVwsMvDTslqvdj6WSP7j9';
         const openId = 'user_' + Date.now(); 
 
-        const messageToSend = `扮演鲁迅回复我：${userInput}`;
+        const messageToSend = `以鲁迅的身份和语气回复我：${userInput}`;
         
         const requestData = {
             message: {
@@ -212,6 +199,7 @@
         });
 
         document.getElementById('userInput').value = ''; 
+        autoResize(document.getElementById('userInput'));
     };
 
     document.getElementById('clearButton').onclick = function() {
@@ -248,7 +236,7 @@
                 content: {
                     type: "text",
                     value: {
-                        showText: `以鲁迅的身份和语气回复我：${originalMessage}`
+                        showText: `${originalMessage}`
                     }
                 }
             },
