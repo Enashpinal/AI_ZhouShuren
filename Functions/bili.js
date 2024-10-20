@@ -1,33 +1,22 @@
-async function fetchHTML(url) {
-    const response = await fetch(url);
-    if (!response.ok) {
-        throw new Error('网络请求失败');
-    }
-
-    const text = await response.text();
-    return text;
-}
-
 addEventListener('fetch', event => {
-    event.respondWith(handleRequest(event.request));
-});
+  event.respondWith(handleRequest(event.request))
+})
 
 async function handleRequest(request) {
-    const seedURL = 'https://www.bilibili.com/v/popular/rank/all';
-    
-    try {
-        const htmlContent = await fetchHTML(seedURL);
+  const url = new URL(request.url)
+  const min = parseInt(url.searchParams.get('min')) || 0
+  const max = parseInt(url.searchParams.get('max')) || 100
 
-        // 这里可以将 HTML 内容直接放入 JSON 对象中
-        const jsonResponse = {
-            source: "哔哩哔哩排行榜",
-            html: htmlContent
-        };
+  if (min >= max) {
+    return new Response(JSON.stringify({ error: 'Invalid range' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
 
-        return new Response(JSON.stringify(jsonResponse), {
-            headers: { 'Content-Type': 'application/json' }
-        });
-    } catch (error) {
-        return new Response('请求失败: ' + error.message, { status: 500 });
-    }
+  const randomNum = Math.floor(Math.random() * (max - min + 1)) + min
+
+  return new Response(JSON.stringify({ randomNumber: randomNum }), {
+    headers: { 'Content-Type': 'application/json' },
+  })
 }
