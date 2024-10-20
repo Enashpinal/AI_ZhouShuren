@@ -1,20 +1,33 @@
+async function fetchHTML(url) {
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error('网络请求失败');
+    }
+
+    const text = await response.text();
+    return text;
+}
+
 addEventListener('fetch', event => {
     event.respondWith(handleRequest(event.request));
 });
 
 async function handleRequest(request) {
-    const url = 'https://www.bilibili.com/v/popular/rank/all';
-
+    const seedURL = 'https://www.bilibili.com/v/popular/rank/all';
+    
     try {
-        // 获取 HTML 内容
-        const response = await fetch(url);
-        const html = await response.text();
+        const htmlContent = await fetchHTML(seedURL);
 
-        // 返回 JSON 格式
-        return new Response(JSON.stringify({ html: html }), {
+        // 这里可以将 HTML 内容直接放入 JSON 对象中
+        const jsonResponse = {
+            source: "哔哩哔哩排行榜",
+            html: htmlContent
+        };
+
+        return new Response(JSON.stringify(jsonResponse), {
             headers: { 'Content-Type': 'application/json' }
         });
     } catch (error) {
-        return new Response('Error fetching data: ' + error.message, { status: 500 });
+        return new Response('请求失败: ' + error.message, { status: 500 });
     }
 }
